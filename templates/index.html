@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clima AI - Intelligent Weather & Energy API</title>
+    <meta name="description" content="AI-powered weather analysis and energy prediction API for sustainable building management">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-orange: #f59e0b;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --gradient-2: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+            --gradient-glow: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-effects::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--gradient-glow);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: var(--accent-primary);
+            top: -200px;
+            right: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-secondary);
+            bottom: -100px;
+            left: -100px;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-green);
+            top: 50%;
+            left: 50%;
+            animation-delay: -10s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, -50px) rotate(5deg); }
+            50% { transform: translate(-30px, 30px) rotate(-5deg); }
+            75% { transform: translate(-50px, -30px) rotate(3deg); }
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        nav {
+            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background: var(--gradient-1);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--accent-primary);
+            margin-bottom: 24px;
+        }
+
+        .badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .highlight {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 80px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 120px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* API Demo Section */
+        .demo {
+            padding: 120px 0;
+            background: var(--bg-secondary);
+        }
+
+        .demo-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .demo-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .demo-content p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .demo-features {
+            list-style: none;
+        }
+
+        .demo-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .demo-features li::before {
+            content: '✓';
+            width: 24px;
+            height: 24px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .code-block {
+            background: #0d0d12;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-dot.red { background: #ff5f56; }
+        .code-dot.yellow { background: #ffbd2e; }
+        .code-dot.green { background: #27c93f; }
+
+        .code-content {
+            padding: 24px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-content .comment { color: #6b7280; }
+        .code-content .string { color: #10b981; }
+        .code-content .key { color: #8b5cf6; }
+        .code-content .number { color: #f59e0b; }
+
+        /* Endpoints Section */
+        .endpoints {
+            padding: 120px 0;
+        }
+
+        .endpoints-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .endpoint-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateX(8px);
+        }
+
+        .method {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .method.get { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .method.post { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+
+        .endpoint-info h4 {
+            font-family: 'SF Mono', monospace;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .endpoint-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+        }
+
+        footer a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .demo-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .endpoints-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="logo-icon">🌤️</div>
+                Clima AI
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#endpoints">Endpoints</a></li>
+                <li><a href="/docs">API Docs</a></li>
+            </ul>
+            <a href="/docs" class="nav-cta">Get Started →</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="badge">Live API • v1.0.0</div>
+                <h1>Weather Intelligence<br>Powered by <span class="highlight">AI</span></h1>
+                <p class="hero-description">
+                    Real-time weather analysis, energy predictions, and smart building optimization 
+                    powered by advanced machine learning and LLM technology.
+                </p>
+                <div class="hero-buttons">
+                    <a href="/docs" class="btn btn-primary">
+                        <span>Explore API Docs</span>
+                        <span>→</span>
+                    </a>
+                    <a href="https://github.com/mayankbaluni/clima-ai" class="btn btn-secondary">
+                        <span>⭐</span>
+                        <span>Star on GitHub</span>
+                    </a>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">API Endpoints</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">AI</div>
+                        <div class="stat-label">LLM Powered</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">24/7</div>
+                        <div class="stat-label">Real-time Data</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">Free</div>
+                        <div class="stat-label">Open Source</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need for intelligent weather analysis and sustainable building management</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌡️</div>
+                    <h3>Real-time Weather</h3>
+                    <p>Access current weather data including temperature, humidity, wind speed, and atmospheric pressure from any location worldwide.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>7-Day Forecasts</h3>
+                    <p>Get detailed hourly and daily weather forecasts to plan ahead for energy management and building operations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Analysis</h3>
+                    <p>Leverage LLM-powered insights for weather impact analysis tailored to your building type and operations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Energy Optimization</h3>
+                    <p>Receive AI-generated recommendations for HVAC settings, energy scheduling, and cost savings strategies.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Anomaly Detection</h3>
+                    <p>Identify unusual patterns in sensor data with AI-powered root cause analysis and recommended actions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>ML Predictions</h3>
+                    <p>Linear regression models predict energy consumption with feature importance metrics and performance scores.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo" id="demo">
+        <div class="container">
+            <div class="demo-wrapper">
+                <div class="demo-content">
+                    <h2>Simple Integration</h2>
+                    <p>Get started in minutes with our intuitive RESTful API. Just send a request and receive intelligent weather insights powered by AI.</p>
+                    <ul class="demo-features">
+                        <li>RESTful JSON API with Swagger documentation</li>
+                        <li>CORS enabled for web applications</li>
+                        <li>Structured response models</li>
+                        <li>Comprehensive error handling</li>
+                        <li>Zero external dependencies for weather data</li>
+                    </ul>
+                </div>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-dot red"></span>
+                        <span class="code-dot yellow"></span>
+                        <span class="code-dot green"></span>
+                    </div>
+                    <div class="code-content">
+<span class="comment">// Get AI-powered energy predictions</span>
+<span class="key">POST</span> /predict
+
+{
+  <span class="key">"lat"</span>: <span class="number">28.6139</span>,
+  <span class="key">"lon"</span>: <span class="number">77.2090</span>
+}
+
+<span class="comment">// Response with AI insights</span>
+{
+  <span class="key">"weather"</span>: {
+    <span class="key">"temperature"</span>: <span class="number">24.5</span>,
+    <span class="key">"humidity"</span>: <span class="number">65</span>
+  },
+  <span class="key">"predictions"</span>: [<span class="number">98.2</span>, <span class="number">102.5</span>...],
+  <span class="key">"ai_insight"</span>: <span class="string">"Optimize HVAC..."</span>
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="endpoints" id="endpoints">
+        <div class="container">
+            <div class="section-header">
+                <h2>API Endpoints</h2>
+                <p>Comprehensive endpoints for weather data and AI-powered analysis</p>
+            </div>
+
+            <div class="endpoints-grid">
+                <div class="endpoint-card">
+                    <span class="method get">GET</span>
+                    <div class="endpoint-info">
+                        <h4>/weather</h4>
+                        <p>Get current weather conditions for any location</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method get">GET</span>
+                    <div class="endpoint-info">
+                        <h4>/weather/forecast</h4>
+                        <p>Get 7-day hourly and daily weather forecast</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method post">POST</span>
+                    <div class="endpoint-info">
+                        <h4>/analyze</h4>
+                        <p>AI-powered weather impact analysis for buildings</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method post">POST</span>
+                    <div class="endpoint-info">
+                        <h4>/optimize</h4>
+                        <p>Get AI energy optimization recommendations</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method post">POST</span>
+                    <div class="endpoint-info">
+                        <h4>/anomaly</h4>
+                        <p>AI anomaly detection in sensor data</p>
+                    </div>
+                </div>
+                <div class="endpoint-card">
+                    <span class="method post">POST</span>
+                    <div class="endpoint-info">
+                        <h4>/predict</h4>
+                        <p>ML predictions with AI-powered insights</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Built with ❤️ for sustainable buildings • <a href="https://github.com/mayankbaluni/clima-ai">Open Source on GitHub</a></p>
+        </div>
+    </footer>
+</body>
+</html>

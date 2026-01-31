@@ -1,6 +1,8 @@
 import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import pandas as pd
@@ -290,9 +292,26 @@ Return ONLY valid JSON."""
 # =============================================================================
 # API Endpoints
 # =============================================================================
-@app.get("/", tags=["General"])
+@app.get("/", response_class=HTMLResponse, tags=["General"])
 async def root():
-    """Root endpoint with API information."""
+    """Serve the beautiful landing page."""
+    template_path = Path(__file__).parent / "templates" / "index.html"
+    if template_path.exists():
+        return template_path.read_text()
+    return """
+    <html>
+        <head><title>Clima AI</title></head>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+            <h1>🌤️ Clima AI</h1>
+            <p>AI-powered weather analysis API</p>
+            <a href="/docs">View API Documentation</a>
+        </body>
+    </html>
+    """
+
+@app.get("/api", tags=["General"])
+async def api_info():
+    """API information endpoint."""
     return {
         "name": "Weather AI API",
         "version": "1.0.0",
