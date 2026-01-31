@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pandas
+scikit-learn
+numpy
+requests
+python-dotenv  # For env vars like API keys
+groq  # Or openai if preferred
