@@ -19,15 +19,261 @@ import json
 load_dotenv()
 
 # =============================================================================
-# FastAPI App Configuration
+# Custom Swagger UI Configuration
 # =============================================================================
+CUSTOM_SWAGGER_CSS = """
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-card: #1a1a24;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0b0;
+    --accent-primary: #6366f1;
+    --accent-secondary: #8b5cf6;
+    --accent-green: #10b981;
+}
+
+body {
+    background: var(--bg-primary) !important;
+}
+
+.swagger-ui {
+    background: var(--bg-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.swagger-ui .topbar {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    padding: 15px 0;
+}
+
+.swagger-ui .topbar .download-url-wrapper { display: none; }
+
+.swagger-ui .topbar-wrapper img {
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='80'%3E🌤️%3C/text%3E%3C/svg%3E");
+    height: 50px;
+}
+
+.swagger-ui .topbar-wrapper::after {
+    content: 'Clima AI';
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    margin-left: 15px;
+}
+
+.swagger-ui .info {
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: 16px;
+    margin: 20px 0;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.swagger-ui .info .title {
+    color: var(--text-primary) !important;
+    font-size: 2rem !important;
+}
+
+.swagger-ui .info .description {
+    color: var(--text-secondary) !important;
+}
+
+.swagger-ui .info a { color: var(--accent-primary) !important; }
+
+.swagger-ui .scheme-container {
+    background: var(--bg-secondary) !important;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: none !important;
+}
+
+.swagger-ui .opblock-tag {
+    background: var(--bg-card) !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    border-radius: 12px !important;
+    margin: 10px 0 !important;
+    color: var(--text-primary) !important;
+}
+
+.swagger-ui .opblock {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    margin: 10px 0 !important;
+    background: var(--bg-card) !important;
+    box-shadow: none !important;
+}
+
+.swagger-ui .opblock .opblock-summary {
+    border: none !important;
+    padding: 12px 15px !important;
+}
+
+.swagger-ui .opblock.opblock-get {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.swagger-ui .opblock.opblock-post {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+    background: var(--accent-green) !important;
+    border-radius: 8px !important;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+    background: #3b82f6 !important;
+    border-radius: 8px !important;
+}
+
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock .opblock-summary-description {
+    color: var(--text-primary) !important;
+}
+
+.swagger-ui .opblock .opblock-section-header {
+    background: rgba(255,255,255,0.02) !important;
+    border-color: rgba(255,255,255,0.05) !important;
+}
+
+.swagger-ui .opblock .opblock-section-header h4 {
+    color: var(--text-primary) !important;
+}
+
+.swagger-ui .opblock-body { background: transparent !important; }
+
+.swagger-ui .btn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+.swagger-ui .btn.execute {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    border: none !important;
+}
+
+.swagger-ui .btn.execute:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+}
+
+.swagger-ui select, .swagger-ui input[type=text], .swagger-ui textarea {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important;
+}
+
+.swagger-ui .model-box {
+    background: var(--bg-card) !important;
+    border-radius: 12px !important;
+}
+
+.swagger-ui .model {
+    color: var(--text-secondary) !important;
+}
+
+.swagger-ui .model-title { color: var(--text-primary) !important; }
+
+.swagger-ui .response-col_status { color: var(--text-primary) !important; }
+.swagger-ui .response-col_description { color: var(--text-secondary) !important; }
+
+.swagger-ui .responses-inner {
+    background: var(--bg-secondary) !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+}
+
+.swagger-ui table tbody tr td { color: var(--text-secondary) !important; }
+.swagger-ui .parameter__name { color: var(--text-primary) !important; }
+.swagger-ui .parameter__type { color: var(--accent-primary) !important; }
+
+.swagger-ui .loading-container .loading::after {
+    border-color: var(--accent-primary) transparent transparent !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 4px; }
+
+.swagger-ui .markdown p, .swagger-ui .markdown code {
+    color: var(--text-secondary) !important;
+}
+
+.swagger-ui code {
+    background: var(--bg-secondary) !important;
+    color: var(--accent-green) !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+}
+"""
+
+SWAGGER_UI_PARAMS = {
+    "docExpansion": "list",
+    "defaultModelsExpandDepth": 0,
+    "deepLinking": True,
+    "displayRequestDuration": True,
+    "filter": True,
+    "showExtensions": True,
+    "syntaxHighlight.theme": "monokai",
+}
+
 app = FastAPI(
-    title="Weather AI API",
-    description="AI-powered weather analysis and energy prediction API for sustainable building management",
+    title="🌤️ Clima AI",
+    description="""
+## AI-Powered Weather & Energy Intelligence API
+
+Clima AI provides real-time weather analysis, energy predictions, and smart building optimization powered by advanced machine learning and LLM technology.
+
+### Features
+- 🌡️ **Real-time Weather** - Current conditions from any location
+- 📊 **7-Day Forecasts** - Hourly and daily predictions  
+- 🤖 **AI Analysis** - LLM-powered weather impact insights
+- ⚡ **Energy Optimization** - Smart HVAC recommendations
+- 🔍 **Anomaly Detection** - AI-powered sensor monitoring
+- 📈 **ML Predictions** - Energy consumption forecasting
+
+### Getting Started
+1. Use the endpoints below to fetch weather data
+2. For AI-powered insights, ensure your `GROQ_API_KEY` is configured
+3. All endpoints accept latitude/longitude for location-based queries
+
+---
+    """,
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url=None,  # Disable default docs, we'll create custom
+    redoc_url="/redoc",
+    contact={
+        "name": "Clima AI",
+        "url": "https://github.com/mayankbaluni/clima-ai",
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT",
+    }
 )
+
+# Custom Swagger UI endpoint with styling
+from fastapi.openapi.docs import get_swagger_ui_html
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui():
+    html_response = get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title="Clima AI - API Documentation",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
+        swagger_ui_parameters=SWAGGER_UI_PARAMS,
+        swagger_favicon_url="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='80'%3E🌤️%3C/text%3E%3C/svg%3E"
+    )
+    # Inject custom CSS into the HTML
+    custom_html = html_response.body.decode().replace(
+        "</head>",
+        f"<style>{CUSTOM_SWAGGER_CSS}</style></head>"
+    )
+    return HTMLResponse(content=custom_html)
 
 # CORS Configuration
 app.add_middleware(
