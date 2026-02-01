@@ -212,13 +212,15 @@ body {
 """
 
 SWAGGER_UI_PARAMS = {
-    "docExpansion": "list",
-    "defaultModelsExpandDepth": 0,
-    "deepLinking": True,
-    "displayRequestDuration": True,
-    "filter": True,
-    "showExtensions": True,
-    "syntaxHighlight.theme": "monokai",
+    "docExpansion": "list",           # Show endpoints in list view
+    "defaultModelsExpandDepth": -1,   # Hide schemas by default (cleaner)
+    "deepLinking": True,              # Allow linking to specific endpoints
+    "displayRequestDuration": True,   # Show how long requests take
+    "filter": True,                   # Enable search filter
+    "showExtensions": False,          # Hide extensions (cleaner)
+    "tryItOutEnabled": True,          # Enable "Try it out" by default!
+    "persistAuthorization": True,     # Remember auth between sessions
+    "displayOperationId": False,      # Hide operation IDs (cleaner)
 }
 
 app = FastAPI(
@@ -285,34 +287,91 @@ app.add_middleware(
 )
 
 # =============================================================================
-# Pydantic Models
+# Pydantic Models with Rich Examples
 # =============================================================================
 class Location(BaseModel):
-    lat: float = Field(default=28.6139, description="Latitude (default: Delhi)")
-    lon: float = Field(default=77.2090, description="Longitude (default: Delhi)")
+    """📍 Location coordinates for weather queries"""
+    lat: float = Field(default=28.6139, description="Latitude coordinate", examples=[28.6139, 40.7128, 51.5074])
+    lon: float = Field(default=77.2090, description="Longitude coordinate", examples=[77.2090, -74.0060, -0.1278])
+    
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"lat": 28.6139, "lon": 77.2090},  # Delhi
+                {"lat": 40.7128, "lon": -74.0060},  # New York
+                {"lat": 51.5074, "lon": -0.1278},   # London
+            ]
+        }
+    }
 
 class SensorData(BaseModel):
-    indoor_temperature: float = Field(..., description="Indoor temperature in °C")
-    energy_usage_kwh: float = Field(..., description="Current energy usage in kWh")
-    occupancy: Optional[int] = Field(default=None, description="Number of occupants")
-    hvac_mode: Optional[str] = Field(default="auto", description="HVAC mode: auto/cooling/heating/off")
+    """📊 Building sensor data point"""
+    indoor_temperature: float = Field(..., description="Indoor temperature in °C", examples=[22.5, 24.0, 21.0])
+    energy_usage_kwh: float = Field(..., description="Current energy usage in kWh", examples=[100.0, 150.5, 85.0])
+    occupancy: Optional[int] = Field(default=None, description="Number of occupants", examples=[25, 50, 10])
+    hvac_mode: Optional[str] = Field(default="auto", description="HVAC mode", examples=["auto", "cooling", "heating", "off"])
 
 class AnalysisRequest(BaseModel):
-    lat: float = Field(default=28.6139, description="Latitude")
-    lon: float = Field(default=77.2090, description="Longitude")
-    building_type: Optional[str] = Field(default="commercial", description="Building type: commercial/residential/industrial")
+    """🏢 Request for AI weather impact analysis"""
+    lat: float = Field(default=28.6139, description="Latitude coordinate")
+    lon: float = Field(default=77.2090, description="Longitude coordinate")
+    building_type: Optional[str] = Field(
+        default="commercial", 
+        description="Type of building for tailored analysis",
+        examples=["commercial", "residential", "industrial", "hospital", "school"]
+    )
+    
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"lat": 28.6139, "lon": 77.2090, "building_type": "commercial"},
+                {"lat": 40.7128, "lon": -74.0060, "building_type": "residential"},
+            ]
+        }
+    }
     
 class OptimizationRequest(BaseModel):
-    lat: float = Field(default=28.6139, description="Latitude")
-    lon: float = Field(default=77.2090, description="Longitude")
-    current_energy_kwh: float = Field(default=100.0, description="Current hourly energy consumption")
-    target_temperature: float = Field(default=24.0, description="Target indoor temperature in °C")
-    budget_priority: Optional[str] = Field(default="balanced", description="Priority: cost/comfort/balanced")
+    """⚡ Request for AI energy optimization recommendations"""
+    lat: float = Field(default=28.6139, description="Latitude coordinate")
+    lon: float = Field(default=77.2090, description="Longitude coordinate")
+    current_energy_kwh: float = Field(default=100.0, description="Current hourly energy consumption in kWh", examples=[100.0, 150.0, 200.0])
+    target_temperature: float = Field(default=24.0, description="Desired indoor temperature in °C", examples=[22.0, 24.0, 26.0])
+    budget_priority: Optional[str] = Field(
+        default="balanced", 
+        description="Optimization priority",
+        examples=["cost", "comfort", "balanced", "eco"]
+    )
+    
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "lat": 28.6139, 
+                    "lon": 77.2090, 
+                    "current_energy_kwh": 120.0,
+                    "target_temperature": 24.0,
+                    "budget_priority": "balanced"
+                }
+            ]
+        }
+    }
 
 class AnomalyRequest(BaseModel):
-    lat: float = Field(default=28.6139, description="Latitude")
-    lon: float = Field(default=77.2090, description="Longitude")
-    sensor_readings: List[SensorData] = Field(default=None, description="List of sensor readings")
+    """🔍 Request for AI anomaly detection"""
+    lat: float = Field(default=28.6139, description="Latitude coordinate")
+    lon: float = Field(default=77.2090, description="Longitude coordinate")
+    sensor_readings: Optional[List[SensorData]] = Field(
+        default=None, 
+        description="Optional: Provide your own sensor data, or leave empty to use demo data"
+    )
+    
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"lat": 28.6139, "lon": 77.2090, "sensor_readings": None},
+            ]
+        }
+    }
 
 # =============================================================================
 # Helper Functions
